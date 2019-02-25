@@ -78,6 +78,7 @@ class ExeCmdTest(unittest.TestCase):
 
         self.assertEqual(state.cmda_exe, "cmda undone")
         self.assertEqual(state.cmdb_exe, "cmdb undone")
+        self.assertTrue(executor.failed.startswith("<test_cmd.CmdBFail"))
 
     def test_cmd_execute_fail_a(self):
         state = State()
@@ -93,6 +94,7 @@ class ExeCmdTest(unittest.TestCase):
 
         self.assertEqual(state.cmda_exe, "cmda undone")
         self.assertEqual(state.cmdb_exe, None)
+        self.assertTrue(executor.failed.startswith("<test_cmd.CmdAFail"))
 
 
 class AddCmdTest(unittest.TestCase):
@@ -121,6 +123,7 @@ class AddCmdTest(unittest.TestCase):
 
         self.assertEqual(state.cmda_exe, "cmda undone")
         self.assertEqual(state.cmdb_exe, "cmdb undone")
+        self.assertTrue(executor.failed.startswith("<test_cmd.CmdBFail"))
 
     def test_cmd_execute_fail_a(self):
         state = State()
@@ -134,3 +137,4 @@ class AddCmdTest(unittest.TestCase):
 
         self.assertEqual(state.cmda_exe, "cmda undone")
         self.assertEqual(state.cmdb_exe, None)
+        self.assertTrue(executor.failed.startswith("<test_cmd.CmdAFail"))

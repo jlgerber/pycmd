@@ -22,7 +22,7 @@ class Executor(object):
         self._cmd_stack = []
         self._exceptions = []
         self.logger = logger
-        self.failed = False
+        self.failed = None
 
     def add_cmd(self, cmd):
         """
@@ -40,6 +40,7 @@ class Executor(object):
 
         for cmd in self._cmd_stack:
             if not self._exec_cmd(cmd):
+                self.logger.error("executor.execute() failed on {}".format(self.failed))
                 return False
         return True
 
@@ -50,7 +51,7 @@ class Executor(object):
             self._stack.append(cmd)
             return True
         except Exception:
-            self.failed = True
+            self.failed = str(cmd)
             try:
                 self.logger.error("exeutor.exec_cmd() failed. Unwinding stack.")
                 self.logger.debug("calling cmd.undo()")
@@ -83,9 +84,10 @@ class Executor(object):
         """
         assert len(self._cmd_stack) == 0, "cannot mix exe_cmd and add_cmd/exe"
 
-        if self.failed:
-            self.logger.error("executor.exec_cmd short circuting")
+        if self.failed is not None:
+            self.logger.error("executor.exec_cmd short circuting. Failed on {}".format(self.failed))
             return False
+
         return self._exec_cmd(cmd)
 
     @property
