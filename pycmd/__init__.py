@@ -34,16 +34,31 @@ class Executor(object):
     def failed_cmd(self):
         return self._failed
 
+    @property
+    def exceptions(self):
+        return self._exceptions
+
     def add_cmd(self, cmd):
         """
-        Add a command
+        Add a command to the executor command stack, in preparation for execution.
+
+        :param cmd: The command to be added
+        :param type: Command subclass
+
+        :raises: AssertionError if cmd is not a subclass of Command
+
+        :returns: None
         """
         assert isinstance(cmd, Command), "cmd must be instance of pycmd.Command"
         self._cmd_stack.append(cmd)
 
     def execute(self):
         """
-        Execute commands which have previously been added
+        Execute commands which have previously been added via `add_cmd`.
+
+        :raises: RuntimeError if the command stack is empty
+        :return: Wether execution of stack succeeded or failed
+        :return type: bool
         """
         if len(self._cmd_stack) == 0:
             raise RuntimeError("Command Stack is Empty")
@@ -53,6 +68,29 @@ class Executor(object):
                 self.logger.error("executor.execute() failed on {}".format(self.failed_cmd))
                 return False
         return True
+
+    def exec_cmd(self, cmd):
+        """
+        As an alternative to using `add_cmd` and `execute`, you can execute commands one at a time,
+        pushing them onto the stack if successful, and unwinding the stack if unsuccessful.
+        This alternative may be used, for example. if each command is expensive to initialize.
+
+        Once an exec_cmd call fails, subsequent calls to exec_cmd will short curcuit and
+        return False without any additional action. Effectively, the executor is a one shot affair.
+
+        :param cmd: Command to execute
+        :param type: Command subclass
+
+        :return: success or failure
+        :return type: bool
+        """
+        assert len(self._cmd_stack) == 0, "cannot mix exe_cmd and add_cmd/exe"
+
+        if self.failed:
+            self.logger.error("executor.exec_cmd short circuting. Failed on {}".format(self.failed_cmd))
+            return False
+
+        return self._exec_cmd(cmd)
 
     def _exec_cmd(self, cmd):
         try:
@@ -79,27 +117,3 @@ class Executor(object):
                     self.logger.error("executor.exec_cmd() unwinding stack failure: '{}'".format(err))
                     self._exceptions.append(err)
             return False
-
-    def exec_cmd(self, cmd):
-        """
-        Execute command. If successful, add
-        it to the stack. Otherwise, unwind the
-        stack
-
-        :param cmd: Command to execute
-        :param type: Command subclass
-
-        :return: success or failure
-        :return type: bool
-        """
-        assert len(self._cmd_stack) == 0, "cannot mix exe_cmd and add_cmd/exe"
-
-        if self.failed:
-            self.logger.error("executor.exec_cmd short circuting. Failed on {}".format(self.failed_cmd))
-            return False
-
-        return self._exec_cmd(cmd)
-
-    @property
-    def exceptions(self):
-        return self._exceptions
