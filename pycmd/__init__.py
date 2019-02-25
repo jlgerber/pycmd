@@ -35,12 +35,6 @@ class Executor(object):
         """
         Execute commands which have previously been added
         """
-        def any_fail(a,b):
-            """if either a or b fail, return False"""
-            if a == False or b == False:
-                return False
-            return True
-
         if len(self._cmd_stack) == 0:
             raise RuntimeError("Command Stack is Empty")
 
