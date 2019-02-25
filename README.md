@@ -23,7 +23,7 @@ executor.add_cmd(cmd_b())
 executor.add_cmd(cmd_c())
 executor.execute()
 if executor.failed:
-    print "Failure", executor.failed
+    print "Failure", executor.failed_cmd
 ```
 
 ### Choice 2 - Immediate Cmd execution
